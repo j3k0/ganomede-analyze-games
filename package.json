@@ -3,9 +3,12 @@
   "version": "0.0.1",
   "description": "Analyze games between players",
   "main": "index.js",
+  "bin": {
+    "validate-usernames": "./bin/validate-usernames"
+  },
   "scripts": {
     "prepublish": "npm run lint && npm run test",
-    "lint": "eslint src/ test/",
+    "lint": "eslint bin/* src/ test/",
     "test": "mocha --inline-diffs --no-exit --throw-deprecation test/*.test.js",
     "testw": "npm run test -- --watch"
   },
@@ -24,5 +27,10 @@
     "chai": "^3.5.0",
     "eslint": "^3.6.1",
     "mocha": "^3.1.0"
+  },
+  "dependencies": {
+    "async": "^2.0.1",
+    "lodash": "^4.16.2",
+    "request": "^2.75.0"
   }
 }
