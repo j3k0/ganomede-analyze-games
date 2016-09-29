@@ -1,0 +1,28 @@
+{
+  "name": "ganomede-analyze-games",
+  "version": "0.0.1",
+  "description": "Analyze games between players",
+  "main": "index.js",
+  "scripts": {
+    "prepublish": "npm run lint && npm run test",
+    "lint": "eslint src/ test/",
+    "test": "mocha --inline-diffs --no-exit --throw-deprecation test/*.test.js",
+    "testw": "npm run test -- --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/j3k0/ganomede-analyze-games.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/j3k0/ganomede-analyze-games/issues"
+  },
+  "homepage": "https://github.com/j3k0/ganomede-analyze-games#readme",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint": "^3.6.1",
+    "mocha": "^3.1.0"
+  }
+}
