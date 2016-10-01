@@ -1,27 +1,47 @@
 'use strict';
 
 const path = require('path');
-const async = require('async');
 const {expect} = require('chai');
-const rejectValid = require('../bin/validate-usernames');
-const lines = require('../src/lines');
+const Script = require('../src/script');
 
-const readUsernamesAndExecute = (fn, callback) => {
-  const filepath = path.resolve(__dirname, 'usernames.txt');
+describe('Script', () => {
+  const scriptFunction = function (inputLines, {parallelism}, callback) {
+    scriptFunction.called = true;
+    scriptFunction.calledArgs = [inputLines, {parallelism}];
+    setImmediate(callback, null);
+  };
 
-  async.waterfall([
-    (cb) => lines(filepath, cb),
-    fn
-  ], callback);
-};
+  scriptFunction.called = false;
+  scriptFunction.calledArgs = null;
 
-describe('scripts', () => {
-  it('./bin/validate-usernames', (done) => {
-    readUsernamesAndExecute(rejectValid, (err, invalid) => {
+  it('#input', () => {
+    expect(new Script(scriptFunction))
+      .to.have.property('input', process.argv[2]);
+
+    expect(new Script(scriptFunction, {input: './xxx.txt'}))
+      .to.have.property('input', './xxx.txt');
+  });
+
+  it('#parallelism', () => {
+    expect(new Script(scriptFunction))
+      .to.have.property('parallelism', 1);
+
+    expect(new Script(scriptFunction, {parallelism: 5}))
+      .to.have.property('parallelism', 5);
+  });
+
+  it('.exec()', (done) => {
+    const script = new Script(scriptFunction, {
+      name: 'bin',
+      input: path.resolve(__dirname, 'lines.txt')
+    });
+
+    script.exec((err, results) => {
       expect(err).to.be.null;
-      expect(invalid).to.eql([
-        'i-do-not-exist',
-        'me-too'
+      expect(scriptFunction.called).to.be.true;
+      expect(scriptFunction.calledArgs).to.eql([
+        ['lines.txt', 'some stuff'],
+        {parallelism: 1}
       ]);
       done();
     });

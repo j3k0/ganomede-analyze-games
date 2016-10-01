@@ -1,32 +1,20 @@
 #!/usr/bin/env node
 'use strict';
 
-const util = require('util');
+const Script = require('../src/script');
 const async = require('async');
 const lodash = require('lodash');
-const init = require('../src/init-script');
 const validateUsername = require('../src/validate-username');
 
-const rejectValid = (lines, callback) => {
+const rejectValid = (lines, {parallelism}, callback) => {
   const usernames = lodash.flatten(
     lines.map(line => line.split(' '))
   );
 
-  async.reject(usernames, validateUsername, callback);
-};
-
-const main = (lines) => {
-  rejectValid(lines, (err, invalidUsernames) => {
-    if (err) {
-      console.error(util.inspect(err));
-      return process.exitCode = 1;
-    }
-
-    console.log(invalidUsernames.join('\n'));
-  });
+  async.rejectLimit(usernames, parallelism, validateUsername, callback);
 };
 
 module.exports = rejectValid;
 
 if (!module.parent)
-  init(main);
+  Script.main(rejectValid);
