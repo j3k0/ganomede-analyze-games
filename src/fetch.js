@@ -77,7 +77,7 @@ const fetchArchivedGame = (alice, bob, callback) => {
         lodash.map(game.players, 'username'),
         participants
       ))
-      .sort((left, right) => right.endTime - left.endTime);
+      .sort((left, right) => right.date - left.date);
 
     callback(null, (gamesBetween.length > 0) ? gamesBetween[0] : null);
   });
