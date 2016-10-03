@@ -2,3 +2,9 @@
 lines.txt
 
 some stuff
+
+
+#ignore
+  # comments
+    # (lines starting with diez)
+# ^ also whitespace

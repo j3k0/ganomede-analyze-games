@@ -10,7 +10,15 @@ const lines = (path, callback) => {
   const result = [];
 
   input.on('error', e => callback(e));
-  reader.on('line', line => line && result.push(line));
+
+  reader.on('line', line => {
+    const trimmed = line.trim();
+    const legitimate = trimmed && !trimmed.startsWith('#');
+
+    if (legitimate)
+      result.push(trimmed);
+  });
+
   reader.on('close', () => callback(null, result));
 };
 
