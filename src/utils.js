@@ -2,6 +2,7 @@
 
 const http = require('http');
 const util = require('util');
+const lodash = require('lodash');
 const request = require('request');
 
 const safeReq = (opts, callback) => {
@@ -14,6 +15,10 @@ const safeReq = (opts, callback) => {
 };
 
 module.exports = {
+  arrays: {
+    equalWhenSorted: (a, b) => lodash.isEqual(a.sort(), b.sort())
+  },
+
   getJson (uri, callback) {
     const opts = {
       uri,

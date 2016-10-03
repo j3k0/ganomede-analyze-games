@@ -9,7 +9,7 @@
   "scripts": {
     "prepublish": "npm run lint && npm run test",
     "lint": "eslint bin/* src/ test/",
-    "test": "mocha --inline-diffs --no-exit --throw-deprecation test/*.test.js",
+    "test": "API_SECRET=secret mocha --inline-diffs --no-exit --throw-deprecation test/**/*.test.js",
     "testw": "npm run test -- --watch"
   },
   "repository": {
