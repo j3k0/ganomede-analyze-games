@@ -4,9 +4,10 @@ const async = require('async');
 const lodash = require('lodash');
 const {getJson, arrays, tryBoth, firstResult} = require('./utils');
 
+const PROTO = process.env.PROTO || 'http';
 const HOST = process.env.HOST || '127.0.0.1';
 const PORT = parseInt(process.env.PORT, 10) || 3000;
-const endpoint = (service, sub) => `http://${HOST}:${PORT}/${service}/v1${sub}`;
+const endpoint = (service, path) => `${PROTO}://${HOST}:${PORT}/${service}/v1${path}`;
 const auth = (username) => `auth/${process.env.API_SECRET}.${username}`;
 
 const collections = {
