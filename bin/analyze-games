@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+'use strict';
+
+const async = require('async');
+const util = require('util');
+const {fetchGame} = require('../src/fetch');
+const {server} = require('../test/analyzer/fixtures');
+
+if (!module.parent) {
+  // Fetch info on games/invites between 2 players for now
+  const alice = process.argv[2];
+  const bob = process.argv[3];
+
+  let error;
+  let result;
+
+  if (!alice || !bob)
+    throw new Error('Provide 2 usernames');
+
+  async.series([
+    server.start,
+    (cb) => fetchGame(alice, bob, (err, ret) => {
+      error = err;
+      result = ret;
+      cb();
+    }),
+    server.stop
+  ], (ignore, {err, game}) => {
+    process.exitCode == err ? 1 : 0;
+    console.log('\n%s', util.inspect(error || result, {depth: 2}));
+  });
+}
