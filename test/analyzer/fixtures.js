@@ -33,6 +33,7 @@ const server = http.createServer((req, res) => {
 
 module.exports = {
   server: {
+    local: ['127.0.0.1', 'localhost'].includes(HOST),
     start (cb) { server.listen(PORT, HOST, cb); },
     stop (cb) { server.close(cb); }
   }
