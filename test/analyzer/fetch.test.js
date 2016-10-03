@@ -5,6 +5,7 @@ const path = require('path');
 const {expect} = require('chai');
 const {server} = require('./fixtures');
 const {fetchGame} = require('../../src/fetch');
+const analyzeGame = require('../../src/analyze-game');
 
 describe('Fetching stuff', () => {
   before(server.start);
@@ -62,6 +63,41 @@ describe('Fetching stuff', () => {
         expect(game).to.be.null;
         done();
       });
+    });
+  });
+
+  describe.only('analyzeGame()', () => {
+    const test = (p0, p1, kind, obj, expected) => {
+      expect(analyzeGame(p0, p1, kind, obj)).to.eql(expected);
+    };
+
+    it('finishined coordinator game', () => {
+      const game = {
+        id: '0d21e75b4f278acd4e0301c5ad2623de',
+        players: ['p13', 'p07'],
+        scores: [124, 53],
+        turn: 'anonymous',
+        status: 'gameover',
+        gameData: {
+          // players: [ [Object], [Object] ],
+          // currentPlayerIndex: 1,
+          // numPicks: 0,
+          // stock: { pieces: [Object] },
+          // board: { pieces: [Object] },
+          // boardMask: [],
+          startTime: 1475026757.189,
+          endTime: 0,
+          rules: 'original'
+        },
+        type: 'triominos/v1',
+        gameConfig: true
+      };
+
+      // username0,username1,started,ended,winner,score0,score1
+      test(
+        'p07', 'p13', 'finished-coordinator-game', game,
+        'p07,p13,dt-started,dt-ended,p13,53,124'
+      );
     });
   });
 });
