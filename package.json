@@ -4,12 +4,13 @@
   "description": "Analyze games between players",
   "main": "index.js",
   "bin": {
-    "validate-usernames": "./bin/validate-usernames"
+    "validate-usernames": "./bin/validate-usernames",
+    "analyze-games": "./bin/analyze-games"
   },
   "scripts": {
     "prepublish": "npm run lint && npm run test",
     "lint": "eslint bin/* src/ test/",
-    "test": "API_SECRET=secret mocha --inline-diffs --no-exit --throw-deprecation test/**/*.test.js",
+    "test": "API_SECRET=secret mocha --recursive --no-exit --throw-deprecation --recursive ./test",
     "testw": "npm run test -- --watch"
   },
   "repository": {
@@ -31,7 +32,6 @@
   "dependencies": {
     "async": "^2.0.1",
     "lodash": "^4.16.2",
-    "moment": "^2.15.1",
     "request": "^2.75.0"
   }
 }

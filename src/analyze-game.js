@@ -4,7 +4,9 @@ const lodash = require('lodash');
 
 const fmtDate = (ts) => {
   try {
-    return new Date(ts).toISOString();
+    return typeof ts === 'string'
+      ? ts
+      : new Date(ts).toISOString();
   }
   catch (e) {
     return '[ INVALID DATE ]';
@@ -24,33 +26,60 @@ const createCsv = (alice, bob) => function (
     fmtDate(started),
     fmtDate(ended),
     winner || '',
-    score0 || '',
-    score1 || ''
+    (score0 === undefined) ? '' : score0,
+    (score1 === undefined) ? '' : score1,
   ].join(',');
-  const s = Array.prototype.slice.call(arguments).join(',');
-  console.log({s})
-  return s
+};
+
+const parseScores = (scores, alice, bob) => {
+  const aliceScore = scores[alice];
+  const bobScore = scores[bob];
+  const winner = (aliceScore > bobScore) ? alice : bob;
+  return {aliceScore, bobScore, winner};
 };
 
 // Maps game to CSV line.
 module.exports = (alice, bob, whatToAnalyze, obj) => {
   const csv = createCsv(alice, bob);
-  const started = undefined;
-  const ended = undefined;
 
   switch (whatToAnalyze) {
     case 'finished-coordinator-game': {
-      const scores = lodash.zipObject(obj.players, obj.scores);
-      const aliceScore = scores[alice];
-      const bobScore = scores[bob];
-      const winner = (aliceScore > bobScore) ? alice : bob;
+      // seems times are in seconds, not millis.
+      const started = obj.gameData.startTime * 1000;
+      const ended = obj.gameData.endTime * 1000;
+      const {aliceScore, bobScore, winner} = parseScores(
+        lodash.zipObject(obj.players, obj.scores),
+        alice,
+        bob
+      );
       return csv(started, ended, winner, aliceScore, bobScore);
     }
 
-    case 'archived-game':
-    case 'in-progress-coordinator-game':
+    case 'archived-game': {
+      const started = obj.date * 1000;
+      const ended = '';
+      const scores = Object.assign({}, ...obj.players.map(p => {
+        const obj = {};
+        obj[p.username] = p.score;
+        return obj;
+      }));
+      const {aliceScore, bobScore, winner} = parseScores(scores, alice, bob);
+      return csv(started, ended, winner, aliceScore, bobScore);
+    }
+
+    case 'in-progress-coordinator-game': {
+      const started = obj.gameData.startTime * 1000;
+      const ended = '';
+      const {aliceScore, bobScore} = parseScores(
+        lodash.zipObject(obj.players, obj.scores),
+        alice,
+        bob
+      );
+      const winner = obj.turn === alice ? bob : alice;
+      return csv(started, ended, winner, aliceScore, bobScore);
+    }
     case 'invitation':
     default:
       throw new Error(`Can not analyze ${whatToAnalyze}`);
   }
-}
+};

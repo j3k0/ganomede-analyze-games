@@ -93,21 +93,26 @@ const fetchArchivedGame = (alice, bob, callback) => {
 // 3. from coordinator (`active`) but in `progress`;
 // 4. null
 const fetchGame = (alice, bob, callback) => {
-  console.log('fetchGame()', alice, bob);
+  console.error('fetchGame()', alice, bob);
+
+  const wrap = (kind, fn) => (cb) => {
+    console.error(`  trying ${kind}…`);
+
+    fn(alice, bob, (err, game) => {
+      if (err)
+        return cb(err);
+
+      if (game)
+        game.__analyze_kind = kind;
+
+      cb(err, game);
+    });
+  };
 
   firstResult(
-    (cb) => {
-      console.log('  trying finished coordinator game…');
-      fetchFinishedCoordinatorGame(alice, bob, cb);
-    },
-    (cb) => {
-      console.log('  trying archived games…');
-      fetchArchivedGame(alice, bob, cb);
-    },
-    (cb) => {
-      console.log('  trying in-progress coordinator game…');
-      fetchInProgressCoordinatorGame(alice, bob, cb);
-    },
+    wrap('finished-coordinator-game', fetchFinishedCoordinatorGame),
+    wrap('archived-game', fetchArchivedGame),
+    wrap('in-progress-coordinator-game', fetchInProgressCoordinatorGame),
     callback
   );
 };

@@ -2,35 +2,40 @@
 'use strict';
 
 const async = require('async');
-const util = require('util');
+const Script = require('../src/script');
 const {fetchGame} = require('../src/fetch');
-const {server} = require('../test/analyzer/fixtures');
+const analyzeGame = require('../src/analyze-game');
 
-if (!module.parent) {
-  // Fetch info on games/invites between 2 players for now
-  const alice = process.argv[2];
-  const bob = process.argv[3];
-  let error;
-  let result;
-  let stack = [
-    server.start,
-    (cb) => fetchGame(alice, bob, (err, ret) => {
-      error = err;
-      result = ret;
-      cb();
-    }),
-    server.stop
-  ];
+const CSV_HEADER = 'username0,username1,started,ended,winner,score0,score1';
 
-  // Disable local server for remote `HOST`s.
-  if (!server.local)
-    stack = stack.slice(1, 2);
+const analyze = (lines, {parallelism}, callback) => {
+  const pairs = lines.map(line => line.split(' '));
 
-  if (!alice || !bob)
-    throw new Error('Provide 2 usernames');
+  const iter = ([alice, bob], cb) => {
+    fetchGame(alice, bob, (err, game) => {
+      if (err)
+        return cb(err);
 
-  async.series(stack, (err) => {
-    process.exitCode = (err || error) ? 1 : 0;
-    console.log('\n%s', util.inspect(err || error || result, {depth: 2}));
+      try {
+        const kind = game.__analyze_kind;
+        delete game.__analyze_kind;
+        cb(null, analyzeGame(alice, bob, kind, game));
+      }
+      catch (e) {
+        cb(e);
+      }
+    });
+  };
+
+  async.mapLimit(pairs, parallelism, iter, (err, lines) => {
+    if (err)
+      return callback(err);
+
+    callback(null, [CSV_HEADER].concat(lines));
   });
-}
+};
+
+module.exports = analyze;
+
+if (!module.parent)
+  Script.main(analyze);

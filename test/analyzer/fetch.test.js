@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const lodash = require('lodash');
 const {expect} = require('chai');
 const {server} = require('./fixtures');
 const {fetchGame} = require('../../src/fetch');
@@ -14,7 +15,12 @@ describe('Fetching stuff', () => {
   const expectJson = (actual, expectedPath) => {
     const expectedPathResolved = path.resolve(__dirname, expectedPath);
     const expected = JSON.parse(fs.readFileSync(expectedPathResolved, 'utf8'));
-    expect(actual).to.eql(expected);
+
+    expect(
+      // We bind this prop inside fetch to know what kind of game we got,
+      // remove it for actual comparison.
+      lodash.omit(actual, '__analyze_kind')
+    ).to.eql(expected);
   };
 
   describe('fetchGame()', () => {
@@ -32,6 +38,7 @@ describe('Fetching stuff', () => {
         expect(err).to.be.null;
         expect(game).to.be.ok;
         expect(game).to.eql({
+          __analyze_kind: 'archived-game',
           id: '989fd29d0b636ac09c7ec947c900f049',
           date: 1439500003,
           players: [{
@@ -66,7 +73,7 @@ describe('Fetching stuff', () => {
     });
   });
 
-  describe.only('analyzeGame()', () => {
+  describe('analyzeGame()', () => {
     const test = (p0, p1, kind, obj, expected) => {
       expect(analyzeGame(p0, p1, kind, obj)).to.eql(expected);
     };
@@ -93,10 +100,68 @@ describe('Fetching stuff', () => {
         gameConfig: true
       };
 
+      const started = new Date(game.gameData.startTime * 1000).toISOString();
+      const ended = new Date(game.gameData.endTime * 1000).toISOString();
+
       // username0,username1,started,ended,winner,score0,score1
       test(
         'p07', 'p13', 'finished-coordinator-game', game,
-        'p07,p13,dt-started,dt-ended,p13,53,124'
+        `p07,p13,${started},${ended},p13,53,124`
+      );
+    });
+
+    it('archived games', () => {
+      const game = {
+        id: '989fd29d0b636ac09c7ec947c900f049',
+        date: 1439500003,
+        players: [{
+          username: 'p04',
+          score: -89
+        }, {
+          username: 'p00',
+          score: -100
+        }]
+      };
+
+      const started = new Date(game.date * 1000).toISOString();
+
+      test(
+        'p00', 'p04', 'archived-game', game,
+        `p00,p04,${started},,p04,-100,-89`
+      );
+    });
+
+    it('analyzes in-progress coordinator game', () => {
+      const game = {
+        id: 'f2af83ca45f60909680c38eac245ffe4',
+        players: ['p05', 'p07'],
+        scores: [0, 9],
+        turn: 'p07',  // winner is other player,
+                      // even though it's lower score
+        status: 'active',
+        gameData: {
+          // players: [ [Object], [Object] ],
+          // currentPlayerIndex: 0,
+          // numPicks: 0,
+          // stock: { pieces: [Object] },
+          // board: { pieces: [Object] },
+          // boardMask: [],
+          startTime: 1473043752.619,
+          endTime: 0,
+          rules: 'original'
+        },
+        type: 'triominos/v1',
+        // gameConfig:
+        //  { mod:
+        //     { tile: 'com.triominos.tile.default',
+        //       background: 'com.triominos.background.blue1' } }
+      };
+
+      const started = new Date(game.gameData.startTime * 1000).toISOString();
+
+      test(
+        'p05', 'p07', 'in-progress-coordinator-game', game,
+        `p05,p07,${started},,p05,0,9`
       );
     });
   });

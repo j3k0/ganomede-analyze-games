@@ -1,8 +1,11 @@
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const {expect} = require('chai');
 const Script = require('../src/script');
+const child = require('child_process');
+const {server} = require('./analyzer/fixtures');
 
 describe('Script', () => {
   const scriptFunction = function (inputLines, {parallelism}, callback) {
@@ -46,4 +49,38 @@ describe('Script', () => {
       done();
     });
   });
+});
+
+describe('Binaries', () => {
+  before(server.start);
+  after(server.stop);
+
+  const testSciprt = (file, input, expectedStdOutLines) => {
+    it(`./${file}`, (done) => {
+      const scriptPath = path.resolve(__dirname, '../bin', file);
+      const inputPath = path.resolve(__dirname, input);
+      const command = `${scriptPath} ${inputPath}`;
+
+      child.exec(command, (err, stdout, stderr) => {
+        expect(err).to.be.null;
+        expect(stdout).to.equal(expectedStdOutLines.join('\n'));
+        done();
+      });
+    });
+  };
+
+  testSciprt('validate-usernames', './usernames.txt', [
+    'i-do-not-exist',
+    'me-too',
+    ''
+  ]);
+
+  testSciprt(
+    'analyze-games',
+    './analyzer/sample-data/input.txt',
+    fs.readFileSync(
+      path.resolve(__dirname, './analyzer/sample-data/output.txt'),
+      'utf8'
+    ).split('\n')
+  );
 });
