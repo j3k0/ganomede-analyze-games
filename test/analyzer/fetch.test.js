@@ -62,7 +62,28 @@ describe('Fetching stuff', () => {
       });
     });
 
-    it('returns `null` if no games between players are found', (done) => {
+    it('returns pending invitations', (done) => {
+      fetchGame('alice', 'bob', (err, game) => {
+        expect(err).to.be.null;
+        expect(game).to.eql({
+          forAlice: [
+            {
+              id: 'alice-is-invited-by-bob',
+              from: 'bob',
+              to: 'alice',
+              gameId: 'friendly-game-of-triominos',
+              type: 'triominos/v1'
+            }
+          ],
+          forBob: [],
+          __analyze_kind: 'invitation'
+        });
+
+        done();
+      });
+    });
+
+    it('returns `null` if no games or invitations between players are found', (done) => {
       // Samples are a bit fragile, so we are trying "solo" game,
       // so coordinator and statistics have something to say.
       fetchGame('p00', 'p00', (err, game) => {
@@ -162,6 +183,34 @@ describe('Fetching stuff', () => {
       test(
         'p05', 'p07', 'in-progress-coordinator-game', game,
         `p05,p07,${started},,p05,0,9`
+      );
+    });
+
+    it('analyzes invitations', () => {
+      const obj = {
+        forAlice: [
+          {
+            id: 'alice-is-invited-by-bob',
+            from: 'bob',
+            to: 'alice',
+            gameId: 'friendly-game-of-triominos',
+            type: 'triominos/v1'
+          }
+        ],
+        forBob: [],
+        __analyze_kind: 'invitation'
+      };
+
+      test(
+        'alice', 'bob', 'invitation', obj,
+        'alice,bob,,,bob,,'
+      );
+    });
+
+    it('analyzes nothing-found case', () => {
+      test(
+        'alice', 'bob', 'nothing-found', null,
+        'alice,bob,,,,,'
       );
     });
   });

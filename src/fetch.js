@@ -26,6 +26,11 @@ const collections = {
   archivedGames: (username, callback) => getJson(
     endpoint('statistics', `/triominos/v1/${username}/archive`),
     callback
+  ),
+
+  invitations: (username, callback) => getJson(
+    endpoint('invitations', `/${auth(username)}/invitations`),
+    callback
   )
 };
 
@@ -113,14 +118,40 @@ const fetchGame = (alice, bob, callback) => {
     wrap('finished-coordinator-game', fetchFinishedCoordinatorGame),
     wrap('archived-game', fetchArchivedGame),
     wrap('in-progress-coordinator-game', fetchInProgressCoordinatorGame),
+    wrap('invitation', fetchInvite),
+    wrap('nothing-found', (user0, user1, cb) => cb(null, null)),
     callback
   );
 };
 
-// Fetches a game invitation between 2 players.
-// callback(err, inivitation|null).
+// Fetches a game invitations between 2 players.
+// (if none found, null)
+//
+// callback(err, {
+//  forAlice: [invitation] // invitations from bob only for game of triominos
+//  forBob: [invitation]   // invitations from alice only for game of triominos
+// })
 const fetchInvite = (alice, bob, callback) => {
-  throw new Error('NotImplemented');
+  async.parallel([
+    collections.invitations.bind(null, alice),
+    collections.invitations.bind(null, bob)
+  ], (err, [alices, bobs]) => {
+    if (err)
+      return callback(err);
+
+    const forAlice = alices.filter(invite => {
+      return (invite.type === 'triominos/v1') && (invite.from === bob);
+    });
+
+    const forBob = bobs.filter(invite => {
+      return (invite.type === 'triominos/v1') && (invite.from === alice);
+    });
+
+    if ((forAlice.length === 0) && (forBob.length === 0))
+      callback(null, null);
+    else
+      callback(null, {forAlice, forBob});
+  });
 };
 
 module.exports = {fetchGame, fetchInvite};

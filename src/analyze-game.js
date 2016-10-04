@@ -78,7 +78,29 @@ module.exports = (alice, bob, whatToAnalyze, obj) => {
       const winner = obj.turn === alice ? bob : alice;
       return csv(started, ended, winner, aliceScore, bobScore);
     }
-    case 'invitation':
+
+    case 'invitation': {
+      const started = '';
+      const ended = '';
+      let winner = '';
+
+      // if alice has invitation, bob wins
+      // if bob has invitation, alice wins
+      // no winner
+      if (obj.forAlice.length)
+        winner = bob;
+      else if (obj.forBob.length)
+        winner = alice;
+
+      return csv(started, ended, winner);
+    }
+
+    case 'nothing-found': {
+      const started = '';
+      const ended = '';
+      return csv(started, ended);
+    }
+
     default:
       throw new Error(`Can not analyze ${whatToAnalyze}`);
   }
