@@ -37,5 +37,19 @@ const analyze = (lines, {parallelism}, callback) => {
 
 module.exports = analyze;
 
-if (!module.parent)
+if (!module.parent) {
+  if (process.argv.includes('--one')) {
+    if (process.argv.length === 5) {
+      return analyze(
+        [[process.argv[3], process.argv[4]].join(' ')],
+        {parallelism: 1},
+        Script.exit
+      );
+    }
+    else {
+      throw new Error('Single run: ./analyze-games --one username0 username1');
+    }
+  }
+
   Script.main(analyze);
+}
