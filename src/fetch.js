@@ -8,10 +8,11 @@ const PROTO = process.env.PROTO || 'http';
 const DIR = process.env.DIR || '.';
 const HOST = process.env.HOST || '127.0.0.1';
 const PORT = parseInt(process.env.PORT, 10) || 3000;
-const endpoint = (service, path) =>
-    PROTO == 'file'
-        ? `${PROTO}://${DIR}/${service}/v1${path}`
-        : `${PROTO}://${HOST}:${PORT}/${service}/v1${path}`;
+const endpoint = (service, path) => {
+  return PROTO == 'file'
+    ? `${PROTO}://${DIR}/${service}/v1${path}`
+    : `${PROTO}://${HOST}:${PORT}/${service}/v1${path}`;
+};
 const auth = (username) => `auth/${process.env.API_SECRET}.${username}`;
 
 const collections = {

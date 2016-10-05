@@ -15,7 +15,7 @@ const safeReq = (opts, callback) => {
   }
 };
 
-function getJsonFile(path, callback) {
+function getJsonFile (path, callback) {
   require('fs').readFile(path, (err, data) => {
     if (err)
       return callback(err);
@@ -100,7 +100,7 @@ module.exports = {
   },
 
   getJson (uri, callback) {
-    if (uri.slice(0,7) == 'file://')
+    if (uri.slice(0, 7) == 'file://')
       return getJsonFile(uri.slice(7), callback);
 
     const opts = {
