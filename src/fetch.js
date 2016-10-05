@@ -5,15 +5,19 @@ const lodash = require('lodash');
 const {getJson, arrays, tryBoth, firstResult} = require('./utils');
 
 const PROTO = process.env.PROTO || 'http';
+const DIR = process.env.DIR || '.';
 const HOST = process.env.HOST || '127.0.0.1';
 const PORT = parseInt(process.env.PORT, 10) || 3000;
-const endpoint = (service, path) => `${PROTO}://${HOST}:${PORT}/${service}/v1${path}`;
+const endpoint = (service, path) =>
+    PROTO == 'file'
+        ? `${PROTO}://${DIR}/${service}/v1${path}`
+        : `${PROTO}://${HOST}:${PORT}/${service}/v1${path}`;
 const auth = (username) => `auth/${process.env.API_SECRET}.${username}`;
 
 const collections = {
   // list of games without any game data
   coordinator: (username, callback) => getJson(
-    endpoint('coordinator', `/${auth(username)}/active-games`),
+    endpoint('coordinator', `/${auth(username)}/triominos/v1/active-games`),
     callback
   ),
 

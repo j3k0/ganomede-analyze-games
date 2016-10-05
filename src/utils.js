@@ -15,6 +15,21 @@ const safeReq = (opts, callback) => {
   }
 };
 
+function getJsonFile(path, callback) {
+  require('fs').readFile(path, (err, data) => {
+    if (err)
+      return callback(err);
+    let body;
+    try {
+      body = JSON.parse(data);
+    }
+    catch (e) {
+      return callback(e);
+    }
+    callback(null, body);
+  });
+}
+
 module.exports = {
   arrays: {
     equalWhenSorted: (a, b) => lodash.isEqual(a.sort(), b.sort())
@@ -85,6 +100,9 @@ module.exports = {
   },
 
   getJson (uri, callback) {
+    if (uri.slice(0,7) == 'file://')
+      return getJsonFile(uri.slice(7), callback);
+
     const opts = {
       uri,
       method: 'GET',
