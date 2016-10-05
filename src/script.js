@@ -4,6 +4,7 @@ const async = require('async');
 const path = require('path');
 const util = require('util');
 const lines = require('./lines');
+const {stderr, stdout} = require('./logger');
 
 class Script {
   constructor (functionToCall, {name, parallelism, input} = {}) {
@@ -48,8 +49,8 @@ class Script {
     process.exitCode = err ? 1 : 0;
 
     return err
-      ? console.error('%s', Script.usage(err))
-      : console.log('%s', linesToOutput.join('\n'));
+      ? stderr('%s', Script.usage(err))
+      : stdout('%s', linesToOutput.join('\n'));
   }
 
   static main (func) {

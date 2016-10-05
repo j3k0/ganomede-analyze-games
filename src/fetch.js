@@ -4,6 +4,7 @@ const async = require('async');
 const lodash = require('lodash');
 const util = require('util');
 const {getJson, arrays, tryBoth, firstResult} = require('./utils');
+const {stderr} = require('./logger');
 
 const parseTournamentStart = (envVar) => {
   const ts = parseInt(envVar, 10) || NaN;
@@ -28,7 +29,7 @@ const parseTournamentStart = (envVar) => {
     throw new Error(message);
   }
 
-  console.error('Running with TOURNAMENT_START (%d) %s', result, date);
+  stderr('Running with TOURNAMENT_START (%d) %s', result, date);
   return result;
 };
 
@@ -154,10 +155,10 @@ const fetchArchivedGameSinceTournamentStarted = fetchArchivedGameSince({
 // 3. from coordinator (`active`) but in `progress`;
 // 4. null
 const fetchGame = (alice, bob, callback) => {
-  console.error('fetchGame()', alice, bob);
+  stderr('fetchGame()', alice, bob);
 
   const wrap = (kind, fn) => (cb) => {
-    console.error(`  trying ${kind}…`);
+    stderr(`  trying ${kind}…`);
 
     fn(alice, bob, (err, game) => {
       if (err)

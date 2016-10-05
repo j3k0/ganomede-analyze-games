@@ -1,6 +1,7 @@
 'use strict';
 
 const {getJson} = require('./utils');
+const {stderr} = require('./logger');
 
 const endpoint = (username) => {
   return `http://prod.ggs.ovh/users/v1/${username}/metadata/auth`;
@@ -9,7 +10,7 @@ const endpoint = (username) => {
 const validateUsername = (username, callback) => {
   getJson(endpoint(username), (err, body) => {
     if (err) {
-      console.error('validateUsername() failed', err);
+      stderr('validateUsername() failed', err);
       return callback(err);
     }
 

@@ -1,6 +1,7 @@
 'use strict';
 
 const lodash = require('lodash');
+const {stderr} = require('./logger');
 
 const fmtDate = (ts) => {
   try {
@@ -40,7 +41,26 @@ const parseScores = (scores, alice, bob) => {
 
 // Maps game to CSV line.
 module.exports = (alice, bob, whatToAnalyze, obj) => {
-  const csv = createCsv(alice, bob);
+  const csvGen = createCsv(alice, bob);
+  const print = () => {
+    const analyzeInput = {
+      alice,
+      bob,
+      kind: whatToAnalyze,
+      obj
+    };
+
+    const serialized = JSON.stringify(analyzeInput, null, 2)
+      .split('\n')
+      .map(line => `    ${line}`)
+      .join('\n');
+
+    stderr('  analyzing…\n%s', serialized);
+  };
+  const csv = (...args) => {
+    print();
+    return csvGen(...args);
+  };
 
   switch (whatToAnalyze) {
     case 'finished-coordinator-game': {
