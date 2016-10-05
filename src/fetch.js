@@ -124,7 +124,11 @@ const fetchGame = (alice, bob, callback) => {
     wrap('archived-game', fetchArchivedGame),
     wrap('in-progress-coordinator-game', fetchInProgressCoordinatorGame),
     wrap('invitation', fetchInvite),
-    wrap('nothing-found', (user0, user1, cb) => cb(null, null)),
+    wrap('nothing-found', (user0, user1, cb) => {
+      // need an object here,
+      // so wrap can add correct `__analyze_kind` property.
+      cb(null, {});
+    }),
     callback
   );
 };

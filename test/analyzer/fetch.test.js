@@ -88,7 +88,9 @@ describe('Fetching stuff', () => {
       // so coordinator and statistics have something to say.
       fetchGame('p00', 'p00', (err, game) => {
         expect(err).to.be.null;
-        expect(game).to.be.null;
+        expect(game).to.eql({
+          __analyze_kind: 'nothing-found'
+        });
         done();
       });
     });
