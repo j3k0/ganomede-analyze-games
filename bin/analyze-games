@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+'use strict';
+
+const async = require('async');
+const Script = require('../src/script');
+const {fetchGame} = require('../src/fetch');
+const analyzeGame = require('../src/analyze-game');
+
+const CSV_HEADER = 'username0,username1,started,ended,winner,score0,score1';
+
+const analyze = (lines, {parallelism}, callback) => {
+  const pairs = lines.map(line => line.split(' '));
+
+  const iter = ([alice, bob], cb) => {
+    fetchGame(alice, bob, (err, game) => {
+      if (err)
+        return cb(err);
+
+      try {
+        const kind = game.__analyze_kind;
+        delete game.__analyze_kind;
+        cb(null, analyzeGame(alice, bob, kind, game));
+      }
+      catch (e) {
+        cb(e);
+      }
+    });
+  };
+
+  async.mapLimit(pairs, parallelism, iter, (err, lines) => {
+    if (err)
+      return callback(err);
+
+    callback(null, [CSV_HEADER].concat(lines));
+  });
+};
+
+module.exports = analyze;
+
+if (!module.parent) {
+  if (process.argv.includes('--one')) {
+    if (process.argv.length === 5) {
+      return analyze(
+        [[process.argv[3], process.argv[4]].join(' ')],
+        {parallelism: 1},
+        Script.exit
+      );
+    }
+    else {
+      throw new Error('Single run: ./analyze-games --one username0 username1');
+    }
+  }
+
+  Script.main(analyze);
+}

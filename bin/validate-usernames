@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+'use strict';
+
+const Script = require('../src/script');
+const async = require('async');
+const lodash = require('lodash');
+const validateUsername = require('../src/validate-username');
+
+const rejectValid = (lines, {parallelism}, callback) => {
+  const usernames = lodash.flatten(
+    lines.map(line => line.split(' '))
+  );
+
+  async.rejectLimit(usernames, parallelism, validateUsername, callback);
+};
+
+module.exports = rejectValid;
+
+if (!module.parent) {
+  if (process.argv.includes('--one')) {
+    if (process.argv.length === 4) {
+      return rejectValid(
+        [process.argv[3] + ' '],
+        {parallelism: 1},
+        Script.exit
+      );
+    }
+    else {
+      throw new Error('Single run: ./validate-usernames --one username');
+    }
+  }
+
+  Script.main(rejectValid);
+}

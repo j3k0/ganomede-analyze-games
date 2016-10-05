@@ -1,0 +1,7 @@
+[{
+  "id": "alice-is-invited-by-bob",
+  "from": "bob",
+  "to": "alice",
+  "gameId": "friendly-game-of-triominos",
+  "type": "triominos/v1"
+}]
