@@ -90,7 +90,7 @@ const fetchCoordinatorGame = (status) => (alice, bob, callback) => {
           return (game.status === status)
             && arrays.equalWhenSorted(game.players, participants);
         })
-        .sort((left, right) => right.endTime - left.endTime);
+        .sort((left, right) => right.startTime - left.startTime);
 
       if (gamesBetween.length) {
         return tryBoth(
