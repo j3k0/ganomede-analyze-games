@@ -55,6 +55,7 @@ module.exports = (alice, bob, whatToAnalyze, obj) => {
       return csv(started, ended, winner, aliceScore, bobScore);
     }
 
+    case 'tournament-archive-game':
     case 'archived-game': {
       const started = obj.date * 1000;
       const ended = '';
