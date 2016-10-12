@@ -6,7 +6,7 @@ const Script = require('../src/script');
 const {fetchGame} = require('../src/fetch');
 const analyzeGame = require('../src/analyze-game');
 
-const CSV_HEADER = 'username0,username1,started,ended,winner,score0,score1';
+const CSV_HEADER = 'username0,username1,status,started,ended,winner,score0,score1';
 
 const analyze = (lines, {parallelism}, callback) => {
   const pairs = lines.map(line => line.split(' '));

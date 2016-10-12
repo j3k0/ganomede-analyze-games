@@ -15,6 +15,7 @@ const fmtDate = (ts) => {
 };
 
 const createCsv = (alice, bob) => function (
+  status,
   started,
   ended,
   winner,
@@ -24,6 +25,7 @@ const createCsv = (alice, bob) => function (
   return [
     alice,
     bob,
+    status,
     fmtDate(started),
     fmtDate(ended),
     winner || '',
@@ -72,7 +74,7 @@ module.exports = (alice, bob, whatToAnalyze, obj) => {
         alice,
         bob
       );
-      return csv(started, ended, winner, aliceScore, bobScore);
+      return csv('gameover', started, ended, winner, aliceScore, bobScore);
     }
 
     case 'tournament-archive-game':
@@ -85,7 +87,7 @@ module.exports = (alice, bob, whatToAnalyze, obj) => {
         return obj;
       }));
       const {aliceScore, bobScore, winner} = parseScores(scores, alice, bob);
-      return csv(started, ended, winner, aliceScore, bobScore);
+      return csv('gameover', started, ended, winner, aliceScore, bobScore);
     }
 
     case 'in-progress-coordinator-game': {
@@ -97,7 +99,7 @@ module.exports = (alice, bob, whatToAnalyze, obj) => {
         bob
       );
       const winner = obj.turn === alice ? bob : alice;
-      return csv(started, ended, winner, aliceScore, bobScore);
+      return csv('in-progress', started, ended, winner, aliceScore, bobScore);
     }
 
     case 'invitation': {
@@ -113,13 +115,13 @@ module.exports = (alice, bob, whatToAnalyze, obj) => {
       else if (obj.forBob.length)
         winner = alice;
 
-      return csv(started, ended, winner);
+      return csv('invitation', started, ended, winner);
     }
 
     case 'nothing-found': {
       const started = '';
       const ended = '';
-      return csv(started, ended);
+      return csv('none', started, ended);
     }
 
     default:
